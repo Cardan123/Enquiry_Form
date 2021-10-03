@@ -1,40 +1,52 @@
-const express = require('express') ;
-const cors = require('cors') ;
-
+const express = require("express");
+const cors = require("cors");
+const dbConnection = require("../database/config");
 
 class Server {
+  // Constructor
+  constructor() {
+    this.app = express(); // Create an express application
+    this.port = process.env.PORT; // Use environment variable PORT
+    // Definition of paths
+    this.paths = {
+      mensajes: "/api/messages",
+    };
 
-    constructor(){
-        this.app = express();
-        this.port = process.env.PORT;
-        this.paths = {
-            mensajes : '/api/mensajes'
-        }
-        
-        this.middleware();
+    // connection to mongodb
+    this.connectionDB();
 
-        this.routes();
+    // Loading middleware
+    this.middleware();
 
-    }
+    // Loading routes
+    this.routes();
+  }
 
-    middleware(){
-        this.app.use(cors());
+  async connectionDB() {
+    // Connection with Database
+    await dbConnection();
+  }
 
-        this.app.use(express.json());
-    
-        this.app.use(express.static('public'));
-    }
+  middleware() {
+    // Loading cors
+    this.app.use(cors());
 
-    routes(){
-        this.app.use(this.paths.mensajes,require('../routes/mensajes'));
-    }
+    // Parse to JSON
+    this.app.use(express.json());
 
-    listen(){
-        this.app.listen(this.port, () => {
-            console.log(`Example app listening at http://localhost:${this.port}`)
-        })
-    }
+    // Loading static files
+    this.app.use(express.static("public"));
+  }
 
+  routes() {
+    this.app.use(this.paths.mensajes, require("../routes/messages")); //import messages routes
+  }
+
+  listen() {
+    this.app.listen(this.port, () => {
+      console.log(`Example app listening at http://localhost:${this.port}`);
+    });
+  }
 }
 
 module.exports = Server;
